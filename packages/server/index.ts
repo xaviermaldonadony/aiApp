@@ -9,7 +9,7 @@ const app = express();
 const port = process.env.PORT || 300;
 
 app.get('/', (req: Request, resp: Response) => {
-  resp.send(process.env.OPENAI_API_KEY);
+  resp.send('Hello world from server');
 });
 
 app.listen(port, () => {
