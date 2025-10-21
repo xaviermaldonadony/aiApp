@@ -9,15 +9,15 @@ const app = express();
 const port = process.env.PORT || 300;
 
 app.get('/', (req: Request, resp: Response) => {
-  resp.send('Hello world from server');
+   resp.send('Hello world from server');
 });
 
 app.get('/api/hello', (req: Request, resp: Response) => {
-  resp.json({ message: 'Hello from server' });
+   resp.json({ message: 'Hello from server' });
 });
 
 app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+   console.log(`Server is running on http://localhost:${port}`);
 });
 
 //22 - 9
