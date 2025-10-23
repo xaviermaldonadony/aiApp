@@ -1,9 +1,9 @@
 import './App.css';
-import ChatBot from './components/ChatBot';
+import ChatBot from './components/chat/ChatBot';
 
 export const App = () => {
    return (
-      <div className="p-4 h-screen w-2xl">
+      <div className="p-8 h-screen w-full">
          <ChatBot />
       </div>
    );
