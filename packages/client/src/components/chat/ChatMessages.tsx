@@ -11,7 +11,7 @@ type Props = {
 };
 
 const getRoleColor = (role: string) =>
-   `px-3 py-1 rounded-xl ${role == 'user' ? 'bg-blue-600 text-white self-end' : 'bg-gray-100 text-black self-start text-left'}`;
+   `px-3 py-1 max-w-md rounded-xl ${role == 'user' ? 'bg-blue-600 text-white self-end' : 'bg-gray-100 text-black self-start text-left'}`;
 
 const ChatMessages = ({ messages }: Props) => {
    const lastMessageRef = useRef<HTMLDivElement | null>(null);
