@@ -1,6 +1,8 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react';
-import { set } from 'react-hook-form';
+import Skeleton from 'react-loading-skeleton';
+import { sleep } from '@/lib/sleep';
+
 import StarRating from './StarRating';
 
 type Props = {
@@ -22,18 +24,36 @@ type GetReviesResponse = {
 
 const ReviewList = ({ productId }: Props) => {
    const [reviewData, setReviewData] = useState<GetReviesResponse>();
+   const [isLoading, setIsLoading] = useState(false);
 
    const fetchReviews = async () => {
+      setIsLoading(true);
+      await sleep(500);
       const { data } = await axios.get<GetReviesResponse>(
          `/api/products/${productId}/reviews`
       );
 
       setReviewData(data);
+      setIsLoading(false);
    };
 
    useEffect(() => {
       fetchReviews();
    }, [productId]);
+
+   if (isLoading) {
+      return (
+         <div className="flex flex-col gap-5">
+            {[...Array(3)].map((i) => (
+               <div key={i}>
+                  <Skeleton width={150} />
+                  <Skeleton width={100} />
+                  <Skeleton count={2} />
+               </div>
+            ))}
+         </div>
+      );
+   }
 
    return (
       <div className="flex flex-col gap-5 text-left">
