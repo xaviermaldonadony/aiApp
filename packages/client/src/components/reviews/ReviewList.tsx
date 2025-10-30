@@ -1,9 +1,11 @@
 import axios from 'axios';
-import { useEffect, useState } from 'react';
+import { HiSparkles } from 'react-icons/hi2';
 import Skeleton from 'react-loading-skeleton';
+import { useState } from 'react';
 import { sleep } from '@/lib/sleep';
-
 import StarRating from './StarRating';
+import { useQuery } from '@tanstack/react-query';
+import { Button } from '../ui/button';
 
 type Props = {
    productId: number;
@@ -22,31 +24,37 @@ type GetReviesResponse = {
    reviews: Review[];
 };
 
+type SummarizeResponse = {
+   summary: string;
+};
+
 const ReviewList = ({ productId }: Props) => {
-   const [reviewData, setReviewData] = useState<GetReviesResponse>();
-   const [isLoading, setIsLoading] = useState(false);
-   const [error, setError] = useState('');
+   const [summary, setSummary] = useState('');
 
-   const fetchReviews = async () => {
-      setIsLoading(true);
-      await sleep(500);
-      try {
-         const { data } = await axios.get<GetReviesResponse>(
-            `/api/products/${productId}/reviews`
-         );
+   const {
+      data: reviewData,
+      isLoading,
+      error,
+   } = useQuery<GetReviesResponse>({
+      queryKey: ['reviews', productId],
+      queryFn: () => fetchReviews(),
+   });
 
-         setReviewData(data);
-      } catch (e) {
-         console.error(e);
-         setError('Could not fetch the review. Try again later.');
-      } finally {
-         setIsLoading(false);
-      }
+   const handleSummarize = async () => {
+      const { data } = await axios.post<SummarizeResponse>(
+         `/api/products/${productId}/reviews/summarize`
+      );
+
+      setSummary(data.summary);
    };
 
-   useEffect(() => {
-      fetchReviews();
-   }, [productId]);
+   const fetchReviews = async () => {
+      await sleep(500);
+      const { data } = await axios.get<GetReviesResponse>(
+         `/api/products/${productId}/reviews`
+      );
+      return data;
+   };
 
    if (isLoading) {
       return (
@@ -63,20 +71,39 @@ const ReviewList = ({ productId }: Props) => {
    }
 
    if (error) {
-      return <div className="text-red-500">{error}</div>;
+      return (
+         <div className="text-red-500">Could not fetch reviews. Try again!</div>
+      );
    }
 
+   if (!reviewData?.reviews.length) {
+      return null;
+   }
+
+   const currentSummary = reviewData.summary || summary;
+
    return (
-      <div className="flex flex-col gap-5 text-left">
-         {reviewData?.reviews.map((review) => (
-            <div key={review.id}>
-               <div className="font-semibold">{review.author}</div>
-               <div>
-                  <StarRating value={review.rating} />
+      <div>
+         <div className="mb-5">
+            {currentSummary ? (
+               <p>{currentSummary}</p>
+            ) : (
+               <Button onClick={handleSummarize}>
+                  <HiSparkles /> Summarize
+               </Button>
+            )}
+         </div>
+         <div className="flex flex-col gap-5 text-left">
+            {reviewData?.reviews.map((review) => (
+               <div key={review.id}>
+                  <div className="font-semibold">{review.author}</div>
+                  <div>
+                     <StarRating value={review.rating} />
+                  </div>
+                  <div className="py-2"> {review.content}</div>
                </div>
-               <div className="py-2"> {review.content}</div>
-            </div>
-         ))}
+            ))}
+         </div>
       </div>
    );
 };
