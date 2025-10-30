@@ -31,6 +31,7 @@ type SummarizeResponse = {
 const ReviewList = ({ productId }: Props) => {
    const [summary, setSummary] = useState('');
    const [isSummaryLoading, setIsSummaryLoading] = useState(false);
+   const [summaryError, setSummaryError] = useState('');
 
    const {
       data: reviewData,
@@ -42,13 +43,21 @@ const ReviewList = ({ productId }: Props) => {
    });
 
    const handleSummarize = async () => {
-      setIsSummaryLoading(true);
-      const { data } = await axios.post<SummarizeResponse>(
-         `/api/products/${productId}/reviews/summarize`
-      );
+      try {
+         setIsSummaryLoading(true);
+         setSummaryError('');
 
-      setIsSummaryLoading(false);
-      setSummary(data.summary);
+         const { data } = await axios.post<SummarizeResponse>(
+            `/api/products/${productId}/reviews/summarize`
+         );
+
+         setSummary(data.summary);
+      } catch (e) {
+         console.error(e);
+         setSummaryError('Could not summarize reviews. Try again!');
+      } finally {
+         setIsSummaryLoading(false);
+      }
    };
 
    const fetchReviews = async () => {
@@ -85,7 +94,10 @@ const ReviewList = ({ productId }: Props) => {
       <div>
          <div className="mb-5 text-left">
             {currentSummary ? (
-               <p>{currentSummary}</p>
+               <div>
+                  <h1 className="font-semibold py-2">Summarized Review:</h1>
+                  <p>{currentSummary}</p>
+               </div>
             ) : (
                <div>
                   <Button
@@ -99,6 +111,9 @@ const ReviewList = ({ productId }: Props) => {
                      <div className="py-3">
                         <ReviewSkeleton />
                      </div>
+                  )}
+                  {summaryError && (
+                     <p className="text-red-500">{summaryError}</p>
                   )}
                </div>
             )}
